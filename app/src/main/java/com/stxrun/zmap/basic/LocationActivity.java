@@ -21,10 +21,12 @@ import com.amap.api.services.core.LatLonPoint;
 public class LocationActivity implements LocationSource, AMapLocationListener {
     private AMapLocationClient locationClient;
     private AMapLocationClientOption locationOption;
-    private AMapLocation nowLocation;
+    private double latitude;
+    private double longitude;
+    private AMapLocation nowLocation;//现在的位置
     private LocationSource.OnLocationChangedListener mListener = null;//定位监听器
     private Context context;
-    private boolean isFirstLoc=true;//标识，用于判断是否只显示一次定位信息和用户重新定位
+    private boolean isFirstLoc = true;//标识，用于判断是否只显示一次定位信息和用户重新定位
     private AMap aMap;
 
     public LocationActivity(Context context, AMap aMap) {
@@ -45,14 +47,18 @@ public class LocationActivity implements LocationSource, AMapLocationListener {
         locationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
         //设置是否返回地址信息（默认返回地址信息）
         locationOption.setNeedAddress(true);
-        //设置是否只定位一次,默认为false
-        locationOption.setOnceLocation(false);
+        //连续定位
+        locationOption.setInterval(1000);
         //设置是否强制刷新WIFI，默认为强制刷新
         locationOption.setWifiActiveScan(true);
         //设置是否允许模拟位置,默认为false，不允许模拟位置
         locationOption.setMockEnable(false);
         //设置定位间隔,单位毫秒,默认为2000ms
         locationOption.setInterval(2000);
+        //设置是否只定位一次,默认为false
+        //locationOption.setOnceLocation(false);
+        //设置setOnceLocationLatest(boolean b)接口为true，启动定位时SDK会返回最近3s内精度最高的一次定位结果
+        // locationOption.setOnceLocationLatest(true);
     }
 
 
@@ -77,14 +83,12 @@ public class LocationActivity implements LocationSource, AMapLocationListener {
                     aMap.moveCamera(CameraUpdateFactory.zoomTo(17));
                     //将地图移动到定位点
                     aMap.moveCamera(CameraUpdateFactory.changeLatLng(new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude())));
-                    //点击定位按钮 能够将地图的中心移动到定位点
+                    //点击定位按钮 能够将地图的中心移动到定位点,显示小蓝点
                     mListener.onLocationChanged(aMapLocation);
                     //添加图钉
                     //aMap.addMarker(getMarkerOptions(aMapLocation));
                     isFirstLoc = false;
                 }
-
-
             } else {
                 //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
                 Log.e("AmapError", "location Error, ErrCode:"
@@ -103,15 +107,28 @@ public class LocationActivity implements LocationSource, AMapLocationListener {
     }
 
     /**
-     *
      * @return 坐标
      */
     public LatLonPoint getLatLonPoint() {
-        if (nowLocation != null) {
-            return new LatLonPoint(nowLocation.getLatitude(), nowLocation.getLongitude());
-        }else{
-            return null;
-        }
+        return new LatLonPoint(getLatitude(), getLongitude());
     }
 
+    public LatLng getLatLng() {
+        return new LatLng(getLatitude(), getLongitude());
+    }
+
+    public double getLatitude() {
+        if (nowLocation != null) {
+            return nowLocation.getLatitude();
+        }else{
+            return 0.0;
+        }
+    }
+    public double getLongitude() {
+        if (nowLocation != null) {
+            return nowLocation.getLongitude();
+        }else{
+            return 0.0;
+        }
+    }
 }

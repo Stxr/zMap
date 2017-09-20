@@ -75,7 +75,8 @@ public class RouteActivity implements RouteSearch.OnRouteSearchListener {
         if (i == AMapException.CODE_AMAP_SUCCESS) {
             if (result != null && result.getPaths() != null) {
                 if (result.getPaths().size() > 0) {
-                    aMap.clear();
+                    //清除屏幕上的标记，并不清除定位蓝点
+                    aMap.clear(true);
                     ToastUtil.show(context,"规划路径成功");
                     final WalkPath walkPath = result.getPaths()
                             .get(0);
