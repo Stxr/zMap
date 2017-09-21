@@ -1,6 +1,7 @@
 package com.stxrun.zmap.basic;
 
 import android.content.Context;
+import android.location.Location;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -12,99 +13,79 @@ import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.services.core.LatLonPoint;
 
 /**
  * Created by stxr on 17-9-15.
+ * 高德地图定位封装
  */
 
-public class LocationActivity implements LocationSource, AMapLocationListener {
-    private AMapLocationClient locationClient;
-    private AMapLocationClientOption locationOption;
-    private double latitude;
-    private double longitude;
-    private AMapLocation nowLocation;//现在的位置
-    private LocationSource.OnLocationChangedListener mListener = null;//定位监听器
+public class LocationActivity extends MyLocationStyle implements AMap.OnMyLocationChangeListener {
+    //定位样式
+    private MyLocationStyle locationStyle;
+    //定位坐标
+    private Location location;
+    //定位时间间隔
+    private long interval;
+    //定位蓝点模式
+    private int locationType;
+    //是否显示小蓝点
+    private boolean showLocation;
+    //定位到中心的标志位
+    private boolean flagLocation=true;
+
     private Context context;
-    private boolean isFirstLoc = true;//标识，用于判断是否只显示一次定位信息和用户重新定位
     private AMap aMap;
 
     public LocationActivity(Context context, AMap aMap) {
         this.context = context;
         this.aMap = aMap;
-        locationClient = new AMapLocationClient(context);
-        locationClient.setLocationListener(this);
-        initLocationOption();
-        locationClient.setLocationOption(locationOption);
-        //启动定位
-        locationClient.startLocation();
+        // 是否可触发定位并显示定位层
+        aMap.setMyLocationEnabled(true);
+        //设置SDK 自带定位消息监听
+        aMap.setOnMyLocationChangeListener(this);
+        initData();
     }
 
-    private void initLocationOption() {
-        //初始化定位参数
-        locationOption = new AMapLocationClientOption();
-        //设置定位模式为高精度模式，Battery_Saving为低功耗模式，Device_Sensors是仅设备模式
-        locationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
-        //设置是否返回地址信息（默认返回地址信息）
-        locationOption.setNeedAddress(true);
-        //连续定位
-        locationOption.setInterval(1000);
-        //设置是否强制刷新WIFI，默认为强制刷新
-        locationOption.setWifiActiveScan(true);
-        //设置是否允许模拟位置,默认为false，不允许模拟位置
-        locationOption.setMockEnable(false);
-        //设置定位间隔,单位毫秒,默认为2000ms
-        locationOption.setInterval(2000);
-        //设置是否只定位一次,默认为false
-        //locationOption.setOnceLocation(false);
-        //设置setOnceLocationLatest(boolean b)接口为true，启动定位时SDK会返回最近3s内精度最高的一次定位结果
-        // locationOption.setOnceLocationLatest(true);
+    private void initData() {
+        if (locationStyle == null) {
+            locationStyle = new MyLocationStyle();
+        }
+        //定位时间间隔
+        interval=2000;
+        //定位、但不会移动到地图中心点，并且会跟随设备移动。
+        locationType = LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER;
+        //显示小蓝点
+        showLocation = true;
     }
 
+    public void start() {
+        //定位时间间隔
+        setInterval(getInterval());
+        //定位、但不会移动到地图中心点，并且会跟随设备移动。
+        setLocationType(getLocationType());
+        //显示小蓝点
+        setShowLocation(isShowLocation());
+    }
 
+    /**
+     * 定位监听
+     * AMap.setOnMyLocationChangeListener();
+     *
+     * @param location 坐标
+     */
     @Override
-    public void activate(OnLocationChangedListener onLocationChangedListener) {
-        mListener = onLocationChangedListener;
-    }
-
-    @Override
-    public void deactivate() {
-        mListener = null;
-    }
-
-    @Override
-    public void onLocationChanged(AMapLocation aMapLocation) {
-        if (aMapLocation != null) {
-            if (aMapLocation.getErrorCode() == 0) {
-                nowLocation = new AMapLocation(aMapLocation);
-                // 如果不设置标志位，此时再拖动地图时，它会不断将地图移动到当前的位置
-                if (isFirstLoc) {
-                    //设置缩放级别
-                    aMap.moveCamera(CameraUpdateFactory.zoomTo(17));
-                    //将地图移动到定位点
-                    aMap.moveCamera(CameraUpdateFactory.changeLatLng(new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude())));
-                    //点击定位按钮 能够将地图的中心移动到定位点,显示小蓝点
-                    mListener.onLocationChanged(aMapLocation);
-                    //添加图钉
-                    //aMap.addMarker(getMarkerOptions(aMapLocation));
-                    isFirstLoc = false;
-                }
-            } else {
-                //显示错误信息ErrCode是错误码，errInfo是错误信息，详见错误码表。
-                Log.e("AmapError", "location Error, ErrCode:"
-                        + aMapLocation.getErrorCode() + ", errInfo:"
-                        + aMapLocation.getErrorInfo());
-
-                Toast.makeText(context, "定位失败", Toast.LENGTH_LONG).show();
+    public void onMyLocationChange(Location location) {
+        if (location != null) {
+            this.location = location;
+            if (flagLocation) {
+                flagLocation = false;
+                aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(getLatLng(),17));
             }
         }
     }
 
-    public void onDestroy() {
-        if (locationClient != null) {
-            locationClient.onDestroy();
-        }
-    }
 
     /**
      * @return 坐标
@@ -113,22 +94,78 @@ public class LocationActivity implements LocationSource, AMapLocationListener {
         return new LatLonPoint(getLatitude(), getLongitude());
     }
 
+    /**
+     * 坐标
+     *
+     * @return
+     */
     public LatLng getLatLng() {
         return new LatLng(getLatitude(), getLongitude());
     }
 
+    /**
+     * 纬度
+     *
+     * @return
+     */
     public double getLatitude() {
-        if (nowLocation != null) {
-            return nowLocation.getLatitude();
-        }else{
+        if (location != null) {
+            return location.getLatitude();
+        } else {
             return 0.0;
         }
     }
+
+    /**
+     * 经度
+     *
+     * @return
+     */
     public double getLongitude() {
-        if (nowLocation != null) {
-            return nowLocation.getLongitude();
-        }else{
+        if (location != null) {
+            return location.getLongitude();
+        } else {
             return 0.0;
         }
+    }
+
+
+    public void setInterval(long interval) {
+        this.interval = interval;
+        aMap.setMyLocationStyle(locationStyle.interval(interval));
+    }
+
+    public long getInterval() {
+        return interval;
+    }
+
+    public int getLocationType() {
+        return locationType;
+    }
+
+    /**
+     *
+     * @param locationType LOCATION_TYPE_SHOW  只定位一次。
+     *                     LOCATION_TYPE_LOCATE 定位一次，且将视角移动到地图中心点。
+     *                     LOCATION_TYPE_FOLLOW 连续定位、且将视角移动到地图中心点，定位蓝点跟随设备移动。（1秒1次定位）。
+     *                     LOCATION_TYPE_MAP_ROTATE 连续定位、且将视角移动到地图中心点，地图依照设备方向旋转，定位点会跟随设备移动。（1秒1次定位）。
+     *                     LOCATION_TYPE_LOCATION_ROTATE 连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。
+     *                     LOCATION_TYPE_LOCATION_ROTATE_NO_CENTER 连续定位、蓝点不会移动到地图中心点，定位点依照设备方向旋转，并且蓝点会跟随设备移动。
+     *                     LOCATION_TYPE_FOLLOW_NO_CENTER 连续定位、蓝点不会移动到地图中心点，并且蓝点会跟随设备移动。
+     *                     LOCATION_TYPE_MAP_ROTATE_NO_CENTER 连续定位、蓝点不会移动到地图中心点，地图依照设备方向旋转，并且蓝点会跟随设备移动。
+     *
+     */
+    public void setLocationType(int locationType) {
+        this.locationType = locationType;
+        aMap.setMyLocationStyle(locationStyle.myLocationType(locationType));
+    }
+
+    public boolean isShowLocation() {
+        return showLocation;
+    }
+
+    public void setShowLocation(boolean showLocation) {
+        this.showLocation = showLocation;
+        aMap.setMyLocationStyle(locationStyle.showMyLocation(showLocation));
     }
 }

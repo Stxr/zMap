@@ -33,7 +33,9 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="6638c4fab76db6f1efea35cee95e45a0"/>
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:theme="@style/NoActionBar"
+            android:label="z">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

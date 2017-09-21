@@ -2,16 +2,20 @@ package com.stxrun.zmap;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.view.ContextThemeWrapper;
 import android.support.v7.widget.LinearLayoutCompat;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -49,6 +53,7 @@ import com.amap.api.services.route.RideRouteResult;
 import com.amap.api.services.route.RouteSearch;
 import com.amap.api.services.route.WalkRouteResult;
 import com.stxrun.zmap.basic.LocationActivity;
+import com.stxrun.zmap.basic.MYSearchView;
 import com.stxrun.zmap.basic.Navi;
 import com.stxrun.zmap.basic.RouteActivity;
 
@@ -64,6 +69,7 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
     private LocationActivity location;
     private LinearLayout ll_navi;
     private AutoCompleteTextView autoText;
+    private Toolbar toolbar;
     //标志
     Marker marker;
     //导航
@@ -74,30 +80,29 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        context = getApplicationContext();
-
         initView();
-        initData();
         //必须要写
         mapView.onCreate(savedInstanceState);
+        initData();
+    }
+
+    private void initView() {
+        context = getApplicationContext();
+        //显示地图
+        mapView = (MapView) findViewById(R.id.map);
         //获取地图对象
         aMap = mapView.getMap();
+        isNavi = (RelativeLayout) findViewById(R.id.rl_is_navi);
+        autoText = (AutoCompleteTextView) findViewById(R.id.actv_input);
+        ll_navi = (LinearLayout) findViewById(R.id.ll_detail);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+    }
+
+    private void initData() {
         //地图点击监听
         aMap.setOnPOIClickListener(this);
-        //设置显示定位按钮 并且可以点击
-        UiSettings settings = aMap.getUiSettings();
-        //设置定位
-        location = new LocationActivity(getApplicationContext(), aMap);
-        //设置定位监听
-        aMap.setLocationSource(location);
-        // 是否显示定位按钮
-        settings.setMyLocationButtonEnabled(true);
-        //显示比例尺
-        settings.setScaleControlsEnabled(true);
-        // 是否可触发定位并显示定位层
-        aMap.setMyLocationEnabled(true);
-        //mark点击监听
-        // aMap.setOnMarkerClickListener(this);
+        //mark窗口点击监听
         aMap.setOnInfoWindowClickListener(this);
         //触摸监听
         aMap.setOnMapTouchListener(new AMap.OnMapTouchListener() {
@@ -106,23 +111,13 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
                 isNavi.setVisibility(View.GONE);
             }
         });
-        //定位的小图标 默认是蓝点 这里自定义一团火，其实就是一张图片
-        MyLocationStyle myLocationStyle = new MyLocationStyle();
-//        myLocationStyle.myLocationIcon(BitmapDescriptorFactory.fromResource(R.mipmap.firetwo));
-//        myLocationStyle.radiusFillColor(android.R.color.transparent);
-//        myLocationStyle.strokeColor(android.R.color.transparent);
-        aMap.setMyLocationStyle(myLocationStyle);
-    }
+        //设置显示定位按钮 并且可以点击
+        UiSettings settings = aMap.getUiSettings();
+        // 是否显示定位按钮
+        settings.setMyLocationButtonEnabled(true);
+        //显示比例尺
+        settings.setScaleControlsEnabled(true);
 
-    private void initView() {
-        //显示地图
-        mapView = (MapView) findViewById(R.id.map);
-        isNavi = (RelativeLayout) findViewById(R.id.rl_is_navi);
-        autoText = (AutoCompleteTextView) findViewById(R.id.actv_input);
-        ll_navi = (LinearLayout) findViewById(R.id.ll_detail);
-    }
-
-    private void initData() {
         ll_navi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -132,6 +127,11 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
                 navi.onCreate();
             }
         });
+        //设置定位
+        location = new LocationActivity(getApplicationContext(), aMap);
+        //开始定位
+        location.start();
+
         //设置数据源
         String[] autoStrings = new String[]{"北1_102", "北1_103", "北1_104", "北1_202", "北1_402", "北1_302"};
         //设置ArrayAdapter，并且设定以单行下拉列表风格展示（第二个参数设定）。
@@ -145,7 +145,6 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
         super.onDestroy();
         //在activity执行onDestroy时执行mMapView.onDestroy()，销毁地图
         mapView.onDestroy();
-        location.onDestroy();
     }
 
     @Override
@@ -173,16 +172,33 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu1, menu);
+        MenuItem searchItem = menu.findItem(R.id.menu_go);
+        final SearchView searchView = (SearchView) searchItem.getActionView();
+        //得到searchView里面的id
+        int completeTextId = searchView.getResources().getIdentifier("@android:id/search_src_text", null, null);
+        AutoCompleteTextView completeText = searchView.findViewById(R.id.search_src_text);
+        //输入一个字符的时候开始提示
+        completeText.setThreshold(1);
+        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, MyData.ClASSROOM_INDEX);
+        completeText.setAdapter(adapter);
+        completeText.setDropDownHeight(800);
+        //重写监听，防止用数组的时候产生错误
+        completeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                searchView.setQuery(MyData.ClASSROOM_INDEX[position], true);
+            }
+        });
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_go:
-                Toast.makeText(this, "you clicked go", Toast.LENGTH_SHORT).show();
-                break;
-        }
+//        switch (item.getItemId()) {
+//            case R.id.menu_go:
+//                Toast.makeText(this, "you clicked go", Toast.LENGTH_SHORT).show();
+//                break;
+//        }
         return super.onOptionsItemSelected(item);
     }
 
