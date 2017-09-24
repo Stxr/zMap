@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+    <android.support.v7.widget.Toolbar
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:paddingLeft="8dp"
+                android:id="@+id/tv_title"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="郑大通"
+                android:textColor="@android:color/white"
+                android:textSize="16sp" />
+
+            <android.support.v7.widget.SearchView
+                android:id="@+id/search_view"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_alignParentEnd="true"
+                android:gravity="center"
+                android:paddingLeft="16dp"/>
+        </RelativeLayout>
+    </android.support.v7.widget.Toolbar>
+
+

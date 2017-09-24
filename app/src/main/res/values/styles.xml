@@ -6,12 +6,16 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="toolbarStyle">@style/NoInsetToolbar</item><!--去除Toolbar空白部分-->
     </style>
 
     <style name="NoActionBar" parent="AppTheme" >
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
         <item name="android:actionBarStyle">@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse</item>
+    </style>
+    <style name="NoInsetToolbar" parent="Base.Widget.AppCompat.Toolbar">
+        <item name="contentInsetStart">0dp</item>
     </style>
 
 </resources>

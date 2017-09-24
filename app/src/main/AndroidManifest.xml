@@ -35,7 +35,7 @@
             android:value="6638c4fab76db6f1efea35cee95e45a0"/>
         <activity android:name=".MainActivity"
             android:theme="@style/NoActionBar"
-            android:label="z">
+            android:label="郑大通">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

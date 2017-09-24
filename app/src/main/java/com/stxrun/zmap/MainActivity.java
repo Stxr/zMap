@@ -56,6 +56,8 @@ import com.stxrun.zmap.basic.LocationActivity;
 import com.stxrun.zmap.basic.MYSearchView;
 import com.stxrun.zmap.basic.Navi;
 import com.stxrun.zmap.basic.RouteActivity;
+import com.stxrun.zmap.beans.Classroom;
+import com.stxrun.zmap.utils.L;
 
 import static com.stxrun.zmap.basic.RouteActivity.ROUTE_TYPE_WALK;
 
@@ -88,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
 
     private void initView() {
         context = getApplicationContext();
+        L.e("main context: "+context.toString());
         //显示地图
         mapView = (MapView) findViewById(R.id.map);
         //获取地图对象
@@ -138,6 +141,17 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
                 android.R.layout.simple_dropdown_item_1line, autoStrings);
         autoText.setAdapter(adapter);
+
+        aMap.setOnMapClickListener(new AMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                if (marker != null) {
+                    marker.destroy();
+                }
+                marker = aMap.addMarker(new MarkerOptions().position(latLng).title(latLng.toString()));
+
+            }
+        });
     }
 
     @Override
@@ -171,24 +185,27 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
     //    添加菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu1, menu);
-        MenuItem searchItem = menu.findItem(R.id.menu_go);
-        final SearchView searchView = (SearchView) searchItem.getActionView();
-        //得到searchView里面的id
-        int completeTextId = searchView.getResources().getIdentifier("@android:id/search_src_text", null, null);
-        AutoCompleteTextView completeText = searchView.findViewById(R.id.search_src_text);
-        //输入一个字符的时候开始提示
-        completeText.setThreshold(1);
-        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, MyData.ClASSROOM_INDEX);
-        completeText.setAdapter(adapter);
-        completeText.setDropDownHeight(800);
-        //重写监听，防止用数组的时候产生错误
-        completeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                searchView.setQuery(MyData.ClASSROOM_INDEX[position], true);
-            }
-        });
+//        getMenuInflater().inflate(R.menu.menu1, menu);
+//        MenuItem searchItem = menu.findItem(R.id.menu_go);
+//        final SearchView searchView = (SearchView) searchItem.getActionView();
+//        searchView.setMaxWidth(800);
+//        //得到searchView里面的id
+//        int completeTextId = searchView.getResources().getIdentifier("@android:id/search_src_text", null, null);
+//        AutoCompleteTextView completeText = searchView.findViewById(R.id.search_src_text);
+//        //输入一个字符的时候开始提示
+//        completeText.setThreshold(1);
+//        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, MyData.ClASSROOM_INDEX);
+//        completeText.setAdapter(adapter);
+//        //设置下拉选项的高度
+//        completeText.setDropDownHeight(800);
+//        completeText.setTextColor(getResources().getColor(android.R.color.white));
+//        //重写监听，防止用数组的时候产生错误
+//        completeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                searchView.setQuery(MyData.ClASSROOM_INDEX[position], true);
+//            }
+//        });
         return true;
     }
 
@@ -225,10 +242,10 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
 
     @Override
     public void onPOIClick(Poi poi) {
-        if (marker != null) {
-            marker.destroy();
-        }
-        marker = aMap.addMarker(new MarkerOptions().position(poi.getCoordinate()).title("到" + poi.getName() + "去？"));
+//        if (marker != null) {
+//            marker.destroy();
+//        }
+//        marker = aMap.addMarker(new MarkerOptions().position(poi.getCoordinate()).title("到" + poi.getName() + "去？").snippet(poi.getCoordinate().toString()));
 
     }
 
