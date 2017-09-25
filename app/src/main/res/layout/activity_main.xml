@@ -21,59 +21,13 @@
         android:layout_height="match_parent"
         android:layout_below="@id/layout_toolbar" />
 
-    <RelativeLayout
-        android:id="@+id/search_bar_layout"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:layout_marginLeft="5dp"
-        android:layout_marginRight="5dp"
-        android:layout_marginTop="5dp"
-        android:gravity="center_vertical"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/btn_search"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentRight="true"
-            android:layout_centerVertical="true"
-            android:background="@mipmap/offlinearrow_tab2_pressed"
-            android:clickable="true"
-            android:gravity="center"
-            android:paddingEnd="12dp"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingStart="12dp"
-            android:text="搜索"
-            android:textColor="@android:color/white"
-            android:textSize="12dp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_centerVertical="true"
-            android:layout_toLeftOf="@+id/btn_search"
-            android:layout_toStartOf="@+id/btn_search"
-            android:background="@mipmap/search_input_half"
-            android:clickable="true"
-            android:gravity="center_vertical">
-
-
-            <AutoCompleteTextView
-                android:id="@+id/actv_input"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@android:color/white"
-                android:completionThreshold="1"
-                android:drawableLeft="@mipmap/search_input"
-                android:hint="请输入搜索关键字"
-                android:singleLine="true"
-                android:textColor="@color/gary"
-                android:textColorHint="@color/darkgrey"
-                android:textSize="14sp" />
-        </LinearLayout>
-    </RelativeLayout>
+    <com.stxrun.zmap.ui.FloorPicker
+        android:id="@+id/floor_picker"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true" />
 
     <RelativeLayout
         android:id="@+id/rl_is_navi"
@@ -97,7 +51,7 @@
             android:textSize="16sp" />
 
         <TextView
-            android:id="@+id/secondline"
+            android:id="@+id/tv_destination"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/firstline"
@@ -135,5 +89,6 @@
         </LinearLayout>
 
     </RelativeLayout>
+
 
 </RelativeLayout>

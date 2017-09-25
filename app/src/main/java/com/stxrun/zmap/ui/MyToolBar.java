@@ -28,9 +28,10 @@ import com.stxrun.zmap.utils.ToastUtil;
 
 public class MyToolBar extends Toolbar {
     private AutoCompleteTextView completeText;
-    private SearchView searchView;
+    public SearchView searchView;
     private Classroom classroom;
     private Cursor cursor;
+    private MessageIntent msg;
 
     public MyToolBar(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
@@ -52,14 +53,23 @@ public class MyToolBar extends Toolbar {
         completeText.setTextColor(getResources().getColor(android.R.color.white));
         //设置文字大小
         completeText.setTextSize(16);
+        //设置hint
+        searchView.setQueryHint("请输入要搜索的教室");
         //设置输入监听
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                ToastUtil.show(getContext(),query);
+                ToastUtil.show(getContext(), query);
                 //得到教室的坐标
-                LatLng latLng = classroom.getPosition(query);
-                ToastUtil.show(getContext(),latLng.toString());
+                try {
+                    LatLng latLng = classroom.getPosition(query);
+                    ToastUtil.show(getContext(), latLng.toString());
+                    msg.classroomIntent(query,latLng);
+                    //移除焦点
+                    searchView.clearFocus();
+                } catch (Exception e) {
+                    ToastUtil.show(getContext(),"未找到此地点");
+                }
                 return true;
             }
 
@@ -101,13 +111,12 @@ public class MyToolBar extends Toolbar {
         //找到autoCompleteText的id
         completeText = findViewById(R.id.search_src_text);
     }
-
-//    @Override
-//    public Context getContext() {
-//        return context;
-//    }
-
-//    public void setContext(Context context) {
-//        this.context = context;
-//    }
+    //设置监听
+    public void setLocationIntent(MessageIntent msg) {
+        this.msg = msg;
+    }
+    //传送位置数据的接口
+    public interface MessageIntent {
+        void classroomIntent(String name,LatLng latLng);
+    }
 }

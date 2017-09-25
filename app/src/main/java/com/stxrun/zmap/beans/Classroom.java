@@ -43,13 +43,18 @@ public class Classroom {
     public double getLatitude(String name) {
         Cursor cursor = db.query("select latitude from zzu_classroom where name like '" + name + "'", null);
         cursor.moveToFirst();
-        return Double.parseDouble(cursor.getString(cursor.getColumnIndex("latitude")));
+        this.latitude = Double.parseDouble(cursor.getString(cursor.getColumnIndex("latitude")));
+        return this.latitude;
     }
 
     public double getLongtitude(String name) {
         Cursor cursor = db.query("select longtitude from zzu_classroom where name like '" + name + "'", null);
         cursor.moveToFirst();
-        return Double.parseDouble(cursor.getString(cursor.getColumnIndex("longtitude")));
+        this.longtitude = Double.parseDouble(cursor.getString(cursor.getColumnIndex("longtitude")));
+        return this.longtitude;
+    }
+    public LatLng getLatLng() {
+        return new LatLng(this.latitude, this.longtitude);
     }
 
     public LatLng getPosition(String name) {

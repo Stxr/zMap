@@ -1,51 +1,31 @@
 package com.stxrun.zmap;
 
 import android.content.Context;
-import android.graphics.Color;
-import android.support.v4.widget.SimpleCursorAdapter;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.view.ContextThemeWrapper;
-import android.support.v7.widget.LinearLayoutCompat;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 
-import com.amap.api.location.AMapLocation;
-import com.amap.api.location.AMapLocationClient;
-import com.amap.api.location.AMapLocationClientOption;
-import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdate;
 import com.amap.api.maps.CameraUpdateFactory;
-import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
-import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
-import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.maps.model.Poi;
-import com.amap.api.navi.AMapNavi;
 
-import com.amap.api.navi.AmapNaviPage;
-import com.amap.api.navi.AmapNaviParams;
-import com.amap.api.navi.INaviInfoCallback;
+import com.amap.api.maps.model.Text;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.route.BusRouteResult;
 import com.amap.api.services.route.DriveRouteResult;
@@ -53,11 +33,12 @@ import com.amap.api.services.route.RideRouteResult;
 import com.amap.api.services.route.RouteSearch;
 import com.amap.api.services.route.WalkRouteResult;
 import com.stxrun.zmap.basic.LocationActivity;
-import com.stxrun.zmap.basic.MYSearchView;
 import com.stxrun.zmap.basic.Navi;
 import com.stxrun.zmap.basic.RouteActivity;
-import com.stxrun.zmap.beans.Classroom;
+import com.stxrun.zmap.ui.FloorPicker;
+import com.stxrun.zmap.ui.MyToolBar;
 import com.stxrun.zmap.utils.L;
+import com.stxrun.zmap.utils.ToastUtil;
 
 import static com.stxrun.zmap.basic.RouteActivity.ROUTE_TYPE_WALK;
 
@@ -70,12 +51,12 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
     private Context context;
     private LocationActivity location;
     private LinearLayout ll_navi;
-    private AutoCompleteTextView autoText;
-    private Toolbar toolbar;
+    private MyToolBar toolbar;
+    private TextView tv_dest;
+    private FloorPicker floorPicker;
     //标志
     Marker marker;
     //导航
-    private UiSettings mUiSettings;//定义一个UiSettings对象
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,15 +71,16 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
 
     private void initView() {
         context = getApplicationContext();
-        L.e("main context: "+context.toString());
+        L.e("main context: " + context.toString());
         //显示地图
         mapView = (MapView) findViewById(R.id.map);
         //获取地图对象
         aMap = mapView.getMap();
         isNavi = (RelativeLayout) findViewById(R.id.rl_is_navi);
-        autoText = (AutoCompleteTextView) findViewById(R.id.actv_input);
         ll_navi = (LinearLayout) findViewById(R.id.ll_detail);
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (MyToolBar) findViewById(R.id.layout_toolbar);
+        tv_dest = (TextView) findViewById(R.id.tv_destination);
+        floorPicker = (FloorPicker) findViewById(R.id.floor_picker);
         setSupportActionBar(toolbar);
     }
 
@@ -134,24 +116,24 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
         location = new LocationActivity(getApplicationContext(), aMap);
         //开始定位
         location.start();
-
-        //设置数据源
-        String[] autoStrings = new String[]{"北1_102", "北1_103", "北1_104", "北1_202", "北1_402", "北1_302"};
-        //设置ArrayAdapter，并且设定以单行下拉列表风格展示（第二个参数设定）。
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
-                android.R.layout.simple_dropdown_item_1line, autoStrings);
-        autoText.setAdapter(adapter);
-
-        aMap.setOnMapClickListener(new AMap.OnMapClickListener() {
+        toolbar.setLocationIntent(new MyToolBar.MessageIntent() {
             @Override
-            public void onMapClick(LatLng latLng) {
-                if (marker != null) {
-                    marker.destroy();
-                }
-                marker = aMap.addMarker(new MarkerOptions().position(latLng).title(latLng.toString()));
-
+            public void classroomIntent(String name, LatLng latLng) {
+                aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                resetMarker(name, null, latLng);
+//                ToastUtil.show(MainActivity.this, "这是MainActivity的坐标:" + latLng.toString());
             }
         });
+//        aMap.setOnMapClickListener(new AMap.OnMapClickListener() {
+//            @Override
+//            public void onMapClick(LatLng latLng) {
+//                if (marker != null) {
+//                    marker.destroy();
+//                }
+//                marker = aMap.addMarker(new MarkerOptions().position(latLng).title(latLng.toString()));
+//
+//            }
+//        });
     }
 
     @Override
@@ -176,49 +158,46 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
     }
 
     @Override
+    protected void onRestart() {
+        super.onRestart();
+        //回来是取消焦点
+        toolbar.searchView.clearFocus();
+    }
+
+    @Override
+    public void onPOIClick(Poi poi) {
+
+        resetMarker(poi.getName(), null, poi.getCoordinate());
+    }
+
+    @Override
+    public void onInfoWindowClick(Marker marker) {
+        //先清除界面上的标志，
+        aMap.clear(true);
+        //开始导航
+        RouteActivity rout = new RouteActivity(context, aMap, location.getLatLonPoint(), new LatLonPoint(marker.getPosition().latitude, marker.getPosition().longitude));
+        rout.searchRouteResult(ROUTE_TYPE_WALK);
+        isNavi.setVisibility(View.VISIBLE);
+    }
+
+    private void resetMarker(String name, String snippet, LatLng latLng) {
+        if (marker != null) {
+            marker.destroy();
+        }
+        marker = aMap.addMarker(new MarkerOptions().title("到" + name + "去？").position(latLng).snippet(snippet));
+        floorPicker.setVisibility(View.VISIBLE);
+        //设置目的地提示
+        tv_dest.setText(name);
+        //默认显示标题
+        marker.showInfoWindow();
+    }
+
+    @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         //在activity执行onSaveInstanceState时执行mMapView.onSaveInstanceState (outState)，保存地图当前的状态
         mapView.onSaveInstanceState(outState);
     }
-
-    //    添加菜单
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.menu1, menu);
-//        MenuItem searchItem = menu.findItem(R.id.menu_go);
-//        final SearchView searchView = (SearchView) searchItem.getActionView();
-//        searchView.setMaxWidth(800);
-//        //得到searchView里面的id
-//        int completeTextId = searchView.getResources().getIdentifier("@android:id/search_src_text", null, null);
-//        AutoCompleteTextView completeText = searchView.findViewById(R.id.search_src_text);
-//        //输入一个字符的时候开始提示
-//        completeText.setThreshold(1);
-//        ArrayAdapter adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_dropdown_item, MyData.ClASSROOM_INDEX);
-//        completeText.setAdapter(adapter);
-//        //设置下拉选项的高度
-//        completeText.setDropDownHeight(800);
-//        completeText.setTextColor(getResources().getColor(android.R.color.white));
-//        //重写监听，防止用数组的时候产生错误
-//        completeText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                searchView.setQuery(MyData.ClASSROOM_INDEX[position], true);
-//            }
-//        });
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-//        switch (item.getItemId()) {
-//            case R.id.menu_go:
-//                Toast.makeText(this, "you clicked go", Toast.LENGTH_SHORT).show();
-//                break;
-//        }
-        return super.onOptionsItemSelected(item);
-    }
-
 
     @Override
     public void onBusRouteSearched(BusRouteResult busRouteResult, int i) {
@@ -238,21 +217,5 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
     @Override
     public void onRideRouteSearched(RideRouteResult rideRouteResult, int i) {
 
-    }
-
-    @Override
-    public void onPOIClick(Poi poi) {
-//        if (marker != null) {
-//            marker.destroy();
-//        }
-//        marker = aMap.addMarker(new MarkerOptions().position(poi.getCoordinate()).title("到" + poi.getName() + "去？").snippet(poi.getCoordinate().toString()));
-
-    }
-
-    @Override
-    public void onInfoWindowClick(Marker marker) {
-        RouteActivity rout = new RouteActivity(context, aMap, location.getLatLonPoint(), new LatLonPoint(marker.getPosition().latitude, marker.getPosition().longitude));
-        rout.searchRouteResult(ROUTE_TYPE_WALK);
-        isNavi.setVisibility(View.VISIBLE);
     }
 }
