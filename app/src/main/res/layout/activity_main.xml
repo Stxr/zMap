@@ -21,13 +21,20 @@
         android:layout_height="match_parent"
         android:layout_below="@id/layout_toolbar" />
 
+    <com.stxrun.zmap.ui.ClassroomShow
+        android:id="@+id/classroom_show"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:visibility="gone" />
+
     <com.stxrun.zmap.ui.FloorPicker
         android:id="@+id/floor_picker"
-        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentRight="true"
-        android:layout_centerVertical="true" />
+        android:layout_centerVertical="true"
+        android:visibility="gone" />
 
     <RelativeLayout
         android:id="@+id/rl_is_navi"

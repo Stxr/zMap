@@ -3,20 +3,15 @@ package com.stxrun.zmap;
 import android.content.Context;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 
 import com.amap.api.maps.AMap;
-import com.amap.api.maps.CameraUpdate;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.MapView;
 import com.amap.api.maps.UiSettings;
@@ -25,7 +20,6 @@ import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.Poi;
 
-import com.amap.api.maps.model.Text;
 import com.amap.api.services.core.LatLonPoint;
 import com.amap.api.services.route.BusRouteResult;
 import com.amap.api.services.route.DriveRouteResult;
@@ -35,10 +29,10 @@ import com.amap.api.services.route.WalkRouteResult;
 import com.stxrun.zmap.basic.LocationActivity;
 import com.stxrun.zmap.basic.Navi;
 import com.stxrun.zmap.basic.RouteActivity;
+import com.stxrun.zmap.ui.ClassroomShow;
 import com.stxrun.zmap.ui.FloorPicker;
 import com.stxrun.zmap.ui.MyToolBar;
 import com.stxrun.zmap.utils.L;
-import com.stxrun.zmap.utils.ToastUtil;
 
 import static com.stxrun.zmap.basic.RouteActivity.ROUTE_TYPE_WALK;
 
@@ -54,6 +48,7 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
     private MyToolBar toolbar;
     private TextView tv_dest;
     private FloorPicker floorPicker;
+    private ClassroomShow classroomShow;
     //标志
     Marker marker;
     //导航
@@ -81,6 +76,7 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
         toolbar = (MyToolBar) findViewById(R.id.layout_toolbar);
         tv_dest = (TextView) findViewById(R.id.tv_destination);
         floorPicker = (FloorPicker) findViewById(R.id.floor_picker);
+        classroomShow = (ClassroomShow) findViewById(R.id.classroom_show);
         setSupportActionBar(toolbar);
     }
 
@@ -94,6 +90,7 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
             @Override
             public void onTouch(MotionEvent motionEvent) {
                 isNavi.setVisibility(View.GONE);
+                classroomShow.setVisibility(View.GONE);
             }
         });
         //设置显示定位按钮 并且可以点击
@@ -122,6 +119,15 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
                 aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
                 resetMarker(name, null, latLng);
 //                ToastUtil.show(MainActivity.this, "这是MainActivity的坐标:" + latLng.toString());
+            }
+        });
+        floorPicker.setOnvalueChangeListener(new FloorPicker.OnValueChangeListener() {
+            //just a test
+            int[] id = {R.drawable.n1_1f,R.drawable.n1_2f,R.drawable.n1_3f};
+            @Override
+            public void onValueChange(NumberPicker numberPicker, int oldVal, int newVal) {
+                classroomShow.setVisibility(View.VISIBLE);
+                classroomShow.setImage(id[newVal]);
             }
         });
 //        aMap.setOnMapClickListener(new AMap.OnMapClickListener() {
