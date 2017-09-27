@@ -59,11 +59,11 @@ public class MyToolBar extends Toolbar {
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                ToastUtil.show(getContext(), query);
+//                ToastUtil.show(getContext(), query);
                 //得到教室的坐标
                 try {
                     LatLng latLng = classroom.getPosition(query);
-                    ToastUtil.show(getContext(), latLng.toString());
+//                    ToastUtil.show(getContext(), latLng.toString());
                     msg.classroomIntent(query,latLng);
                     //移除焦点
                     searchView.clearFocus();
@@ -118,5 +118,9 @@ public class MyToolBar extends Toolbar {
     //传送位置数据的接口
     public interface MessageIntent {
         void classroomIntent(String name,LatLng latLng);
+    }
+
+    public Classroom getClassroom() {
+        return classroom;
     }
 }

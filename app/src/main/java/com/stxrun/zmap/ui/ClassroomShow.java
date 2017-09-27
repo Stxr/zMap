@@ -14,7 +14,6 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.github.chrisbanes.photoview.PhotoViewAttacher;
 import com.stxrun.zmap.R;
 
 
@@ -39,6 +38,7 @@ public class ClassroomShow extends LinearLayout {
 
     private void initData() {
 //        imageView.setImageBitmap(BitmapFactory.decodeResource());
+//        imageView.set
         Glide.with(getContext()).load(R.drawable.s2_w1f).into(imageView);
     }
 

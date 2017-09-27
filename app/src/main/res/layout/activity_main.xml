@@ -36,6 +36,18 @@
         android:layout_centerVertical="true"
         android:visibility="gone" />
 
+    <RadioButton
+        android:id="@+id/radio_button"
+        android:visibility="gone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/layout_toolbar"
+        android:layout_marginTop="8dp"
+        android:alpha="0.7"
+        android:background="@android:color/white"
+        android:ems="4"
+        android:text="显示楼层" />
+
     <RelativeLayout
         android:id="@+id/rl_is_navi"
         android:layout_width="match_parent"

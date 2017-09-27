@@ -22,6 +22,8 @@ import com.stxrun.zmap.utils.ToastUtil;
 public class FloorPicker extends LinearLayout implements NumberPicker.OnValueChangeListener {
     private NumberPicker numberPicker;
     private OnValueChangeListener listener;
+    private String[] floors = {"1楼", "2楼", "3楼", "4楼", "5楼", "6楼", "7楼", "8楼"};
+
     public FloorPicker(Context context, AttributeSet attrs) {
         super(context, attrs);
         LayoutInflater.from(context).inflate(R.layout.floor_picker, this);
@@ -32,7 +34,6 @@ public class FloorPicker extends LinearLayout implements NumberPicker.OnValueCha
 
 
     private void initData() {
-        String[] floors = {"1楼", "2楼", "3楼", "4楼"};
         numberPicker.setDisplayedValues(floors);
         numberPicker.setMinValue(0);
         numberPicker.setMaxValue(2);
@@ -41,6 +42,8 @@ public class FloorPicker extends LinearLayout implements NumberPicker.OnValueCha
 //        numberPicker.
         //组织键盘弹出来
         numberPicker.setDescendantFocusability(NumberPicker.FOCUS_BLOCK_DESCENDANTS);
+        //不循环
+        numberPicker.setWrapSelectorWheel(false);
     }
 
     private void initView() {
@@ -55,7 +58,22 @@ public class FloorPicker extends LinearLayout implements NumberPicker.OnValueCha
     public void setOnvalueChangeListener(OnValueChangeListener listener) {
         this.listener = listener;
     }
+
     public interface OnValueChangeListener {
         void onValueChange(NumberPicker numberPicker, int oldVal, int newVal);
     }
+
+    /**
+     * 选择楼层
+     *
+     * @param f
+     */
+    public void selectFloor(int f) {
+        numberPicker.setValue(f);
+    }
+
+    public NumberPicker getNumberPicker() {
+        return numberPicker;
+    }
+
 }

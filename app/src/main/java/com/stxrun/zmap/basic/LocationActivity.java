@@ -164,6 +164,10 @@ public class LocationActivity extends MyLocationStyle implements AMap.OnMyLocati
         return showLocation;
     }
 
+    /**
+     * 显示定位蓝点
+     * @param showLocation
+     */
     public void setShowLocation(boolean showLocation) {
         this.showLocation = showLocation;
         aMap.setMyLocationStyle(locationStyle.showMyLocation(showLocation));
