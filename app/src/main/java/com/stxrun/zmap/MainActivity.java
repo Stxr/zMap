@@ -55,7 +55,7 @@ import static com.stxrun.zmap.basic.RouteActivity.ROUTE_TYPE_WALK;
 public class MainActivity extends AppCompatActivity implements RouteSearch.OnRouteSearchListener, AMap.OnPOIClickListener, AMap.OnInfoWindowClickListener, View.OnClickListener {
     //显示地图需要的变量
     private MapView mapView;//地图控件
-    private RelativeLayout isNavi;
+    private RelativeLayout isNavi; //底部的导航
     private AMap aMap;//地图对象
     private Context context;
     private LocationActivity location;
@@ -190,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements RouteSearch.OnRou
         //开始导航
         RouteActivity rout = new RouteActivity(context, aMap, location.getLatLonPoint(), new LatLonPoint(marker.getPosition().latitude, marker.getPosition().longitude));
         rout.searchRouteResult(ROUTE_TYPE_WALK);
+        //显示底部的导航
         isNavi.setVisibility(View.VISIBLE);
     }
 

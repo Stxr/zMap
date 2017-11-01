@@ -49,6 +49,7 @@ public class RouteOverlay {
 		}
 		for (Marker marker : stationMarkers) {
 			marker.remove();
+			marker.destroy();
 		}
 		for (Polyline line : allPolyLines) {
 			line.remove();

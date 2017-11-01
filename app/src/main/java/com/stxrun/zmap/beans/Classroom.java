@@ -2,7 +2,6 @@ package com.stxrun.zmap.beans;
 
 import android.content.Context;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 
 import com.amap.api.maps.model.LatLng;
 import com.stxrun.zmap.statics.Static;
@@ -18,7 +17,7 @@ public class Classroom {
     private Context context;
     private String name;
     private double latitude;
-    private double longtitude;
+    private double longitude;
     private LatLng latLng;
     private DBManager db;
 
@@ -67,15 +66,15 @@ public class Classroom {
      * @return
      */
     public double getLongtitude(String name) {
-        Cursor cursor = db.query("select longtitude from zzu_classroom where name like '" + name + "'", null);
+        Cursor cursor = db.query("select longitude from zzu_classroom where name like '" + name + "'", null);
         cursor.moveToFirst();
         L.e("getLongitude: " + cursor.getCount());
-        this.longtitude = Double.parseDouble(cursor.getString(cursor.getColumnIndex("longtitude")));
-        return this.longtitude;
+        this.longitude = Double.parseDouble(cursor.getString(cursor.getColumnIndex("longitude")));
+        return this.longitude;
     }
 
     public LatLng getLatLng() {
-        return new LatLng(this.latitude, this.longtitude);
+        return new LatLng(this.latitude, this.longitude);
     }
 
     /**

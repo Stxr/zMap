@@ -33,15 +33,17 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="6638c4fab76db6f1efea35cee95e45a0"/>
-        <activity android:name=".MainActivity"
-            android:theme="@style/NoActionBar"
-            android:label="郑大人">
+        <activity android:name=".ui.GuideActivity"
+            android:theme="@style/NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".MainActivity"
+            android:theme="@style/NoActionBar"
+            android:label="郑大人"/>
         <activity android:name="com.amap.api.navi.AmapRouteActivity"
             android:theme="@android:style/Theme.NoTitleBar"
             android:configChanges="orientation|keyboardHidden|screenSize" />

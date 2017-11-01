@@ -19,6 +19,7 @@ import com.stxrun.zmap.R;
 
 /**
  * Created by stxr on 17-9-26.
+ * 显示教室的布局
  */
 
 public class ClassroomShow extends LinearLayout {
